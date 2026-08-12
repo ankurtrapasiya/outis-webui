@@ -11,7 +11,7 @@
 	import { indentUnit } from '@codemirror/language';
 	import { languages } from '@codemirror/language-data';
 
-	import { oneDark } from '@codemirror/theme-one-dark';
+	import { outisMneme } from '$lib/codemirror-outis-mneme-theme';
 
 	import { onMount, createEventDispatcher, getContext, tick, onDestroy } from 'svelte';
 
@@ -254,7 +254,7 @@ print("${endTag}")
 
 		if (isDarkMode) {
 			codeEditor.dispatch({
-				effects: editorTheme.reconfigure(oneDark)
+				effects: editorTheme.reconfigure(outisMneme)
 			});
 		}
 
@@ -268,7 +268,7 @@ print("${endTag}")
 						isDarkMode = _isDarkMode;
 						if (_isDarkMode) {
 							codeEditor.dispatch({
-								effects: editorTheme.reconfigure(oneDark)
+								effects: editorTheme.reconfigure(outisMneme)
 							});
 						} else {
 							codeEditor.dispatch({
