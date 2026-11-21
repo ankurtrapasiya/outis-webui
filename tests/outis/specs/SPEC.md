@@ -71,7 +71,11 @@ OUTIS_BASE_URL=... npx playwright test -c tests/outis/playwright.config.ts -g "N
 `scripts/outis-regression.sh <image>`:
 1. Starts the image as container `outis-regression` on port 3099 with a new, empty named
    volume, `WEBUI_AUTH=true`, `OPENAI_API_BASE_URL` pointing at the fake server, and no
-   `WEBUI_NAME` override.
+   `WEBUI_NAME` override. The embedding model cache (`/app/backend/data/cache/embedding/models`) is the one
+   thing that survives between runs: a shared volume, `outis-regression-models`. Open WebUI loads its embedding
+   model before `/health` answers, and with an empty cache that means 30 files from Hugging Face on every run;
+   on 2026-11-21 that download stalled twice and failed the nightly job. BR-4's second container mounts the
+   same volume.
 2. Waits for `/health`.
 3. Runs the Playwright suite.
 4. Always removes the container and its volume, pass or fail.

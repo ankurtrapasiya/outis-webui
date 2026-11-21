@@ -24,7 +24,10 @@ docker pull -q "$IMAGE" >/dev/null 2>&1 || docker image inspect "$IMAGE" >/dev/n
 
 # The container talks to the suite's fake model server on the host (tests/outis/support/fake-openai.ts).
 FAKE_PORT="${OUTIS_FAKE_PORT:-3098}"
+# The embedding model cache is shared between runs (outis-regression-models): Open WebUI loads the model before
+# /health answers, and an empty cache means a Hugging Face download every run, which stalls now and then.
 docker run -d --name "$NAME" -p "127.0.0.1:$PORT:8080" -v "$VOLUME:/app/backend/data" \
+	-v outis-regression-models:/app/backend/data/cache/embedding/models \
 	--add-host=host.docker.internal:host-gateway \
 	-e WEBUI_AUTH=true -e WEBUI_SECRET_KEY=regression-only \
 	-e ENABLE_OLLAMA_API=false \

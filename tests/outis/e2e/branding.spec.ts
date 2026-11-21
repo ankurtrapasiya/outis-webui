@@ -25,6 +25,8 @@ test('BR-4 a WEBUI_NAME override is used exactly, with no upstream suffix', asyn
 	const port = 3097;
 	execFileSync('docker', [
 		'run', '-d', '--name', name, '-p', `127.0.0.1:${port}:8080`,
+		// same model cache as scripts/outis-regression.sh: no Hugging Face download before /health
+		'-v', 'outis-regression-models:/app/backend/data/cache/embedding/models',
 		'-e', 'WEBUI_NAME=Foo', '-e', 'WEBUI_SECRET_KEY=regression-only', '-e', 'ENABLE_OLLAMA_API=false',
 		image()
 	]);
