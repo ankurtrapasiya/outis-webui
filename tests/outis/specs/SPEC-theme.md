@@ -40,6 +40,14 @@ because the app auto-focuses it after load (history below); TH-30 and TH-31 guar
   built-in Copy icon next to it, and turns with it on hover. Other icon types (PNG URLs) still render as `<img>`.
   User, 2026-11-22: "icons for printing, saving notes to obsidian ... differ from inbuilt one in themes. fix them once
   for all".
+- **TH-38** Reading marks (spec `docs/superpowers/specs/2026-11-22-outis-themes-reading-audit-design.md`, asked
+  2026-11-22: optimise all four themes for reading and retention). In every Outis theme a reply's body text, key
+  term (`strong`), example (`em`, new token `--outis-example`), link and inline maths are five different colours;
+  each mark is ≥ 4.5:1 on the page and no louder than body text; `h2` is further from the page than body text.
+  Values and the ΔE/CVD numbers: `scripts/outis-palette-check.py`. FT changed most (links, key terms, examples
+  and code were one blue; maths is now Outis-Light's ochre, headings `#1f1d1b`, red `#b31f33`, green `#276b4d`);
+  Spark key terms left the maths gold (coral `#e6a3a2`), examples are periwinkle, red/amber are Outis-Dark's.
+  Spark's neutrals are at half their green chroma (page `#171e14`); Spark and FT code uses three syntax hues.
 - **TH-32** Spark -> FT leaves no Spark/dark class and FT's own grays; FT -> Outis-Dark leaves
   no FT class and the blue accent.
 - Font, text sizes, corner radii, spacing and icon strokes are exactly stock Dark's. Only

@@ -175,7 +175,7 @@ test('CR-20 an embed gets the live theme\'s tool colours (--o-*) and follows a p
 	await page.addInitScript(() => localStorage.setItem('theme', 'outis-dark-spark'));
 	await openChat(page, api, fence('html', html), 'CR-20');
 	const t = page.frameLocator('#response-content-container iframe[title="Interactive content"]').locator('#t');
-	await expect(t).toHaveText('#76b900 #12200a');
+	await expect(t).toHaveText('#76b900 #171e14');
 	await page.evaluate(() => (document.documentElement.className = 'light outis-light outis-ft'));
 	await expect(t).toHaveText('#005b7f #fff1e0');
 	await page.evaluate(() => (document.documentElement.className = 'light outis-light'));
@@ -282,8 +282,8 @@ test('CR-21 callouts carry the reading-guide labels: Takeaway, Meaning, Trap, Re
 	await expect(message.locator('.outis-alert[data-alert="CAUTION"]')).toContainText('CR21 caution body');
 });
 
-test('CR-22 bold is the key-term copper and italic the example blue in both Outis themes; a bold heading is not recoloured', async ({ page, api }) => {
-	const message = await openChat(page, api, '## Heading with **bold**\n\nA **key term**, an *example* and `42`.', 'CR-22');
+test('CR-22 bold is the key-term colour and italic the example colour in both Outis themes, not the link colour; a bold heading is not recoloured', async ({ page, api }) => {
+	const message = await openChat(page, api, '## Heading with **bold**\n\nA **key term**, an *example*, a [link](https://example.com) and `42`.', 'CR-22');
 	const colours = () =>
 		message.evaluate((root) => {
 			const probe = (v: string) => {
@@ -295,13 +295,14 @@ test('CR-22 bold is the key-term copper and italic the example blue in both Outi
 				return c;
 			};
 			const q = (sel: string) => getComputedStyle(root.querySelector(sel) as Element).color;
-			return { strong: q('p strong'), em: q('p em'), h2: q('h2'), h2strong: q('h2 strong'), key: probe('--outis-key'), blue: probe('--outis-code-node') };
+			return { strong: q('p strong'), em: q('p em'), a: q('p a'), h2: q('h2'), h2strong: q('h2 strong'), key: probe('--outis-key'), example: probe('--outis-example') };
 		});
 	for (const theme of ['dark outis-dark', 'light outis-light']) {
 		await page.evaluate((t) => (document.documentElement.className = t), theme);
 		await expect.poll(async () => (await colours()).strong).toBe((await colours()).key);
 		const c = await colours();
-		expect(c.em, theme).toBe(c.blue);
+		expect(c.em, theme).toBe(c.example);
+		expect(c.em, theme).not.toBe(c.a);
 		expect(c.strong, theme).not.toBe(c.em);
 		expect(c.h2strong, theme).toBe(c.h2);
 	}

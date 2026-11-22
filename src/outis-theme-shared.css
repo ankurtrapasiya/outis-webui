@@ -341,7 +341,7 @@ html:is(.outis-dark, .outis-light) .katex-display {
  * Reading colour guide (asked 2026-10-05: "the text part is all the same, so it is a lot to read").
  * One code across every reply, taught to every model by the global "Outis reading guide" filter:
  *   **bold**  key term or concept          -> warm copper (--outis-key)
- *   *italic*  an example                   -> the code-node blue
+ *   *italic*  an example                   -> bluish green (--outis-example)
  *   `code`    a number, value or code name -> the maths amber, on a faint chip
  *   > [!TIP] takeaway, [!NOTE] plain meaning, [!IMPORTANT] rule to remember, [!WARNING] trap,
  *   > [!CAUTION] "Your turn": a question for the reader
@@ -357,8 +357,10 @@ html:is(.outis-dark, .outis-light) body .markdown-prose strong {
 html:is(.outis-dark, .outis-light) body .markdown-prose :is(h1, h2, h3, h4, h5, h6) strong {
 	color: inherit;
 }
+/* Examples in bluish green (blue in Spark, whose accent is green), apart from the link colour: an
+   example that looks like a link is a wrong signal (spec 2026-11-22-outis-themes-reading-audit). */
 html:is(.outis-dark, .outis-light) body .markdown-prose em {
-	color: var(--outis-code-node);
+	color: var(--outis-example);
 }
 /* Jargon tips (2026-11-15, spec tests/outis/specs/SPEC-jargon-tips.md): [term]{tip="…"} renders as the
    term with a dotted underline (the same cue as a coloured term on an equation card) and a floating

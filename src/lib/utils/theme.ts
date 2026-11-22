@@ -4,7 +4,7 @@ import { theme } from '$lib/stores';
 // besides `dark`/`light`; the variants (src/outis-variants.css) layer a palette on a base.
 const OUTIS: Record<string, { classes: string[]; meta: string; grays?: string[] }> = {
 	'outis-dark': { classes: ['outis-dark'], meta: '#1a1713', grays: ['#282521', '#211d1a', '#1a1713', '#14110e'] },
-	'outis-dark-spark': { classes: ['outis-dark', 'outis-spark'], meta: '#12200a', grays: ['#24360f', '#1a2a0d', '#12200a', '#0f1a06'] },
+	'outis-dark-spark': { classes: ['outis-dark', 'outis-spark'], meta: '#171e14', grays: ['#2b3323', '#20271b', '#171e14', '#131810'] },
 	'outis-light': { classes: ['outis-light'], meta: '#fbf9f5' },
 	'outis-light-ft': { classes: ['outis-light', 'outis-ft'], meta: '#fff1e0' }
 };

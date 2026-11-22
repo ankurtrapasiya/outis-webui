@@ -197,7 +197,7 @@ test('CD-15 Spark and FT give diagrams their own root colour, also in the full-s
 	const rooted = `<div class="outis-diagram"><svg xmlns="http://www.w3.org/2000/svg" width="2400" height="300" viewBox="0 0 2400 300"><rect class="cd-root" width="200" height="80" style="fill:var(--outis-diagram-root-fill, #000000)"/></svg></div>`;
 	await openChat(page, api, 'CD-15', `Root:\n\n${rooted}\n\nEnd`, 'outis-dark-spark');
 	const fill = (scope: any) => scope.locator('.cd-root').first().evaluate((e: Element) => getComputedStyle(e).fill);
-	expect(await fill(page)).toBe('rgb(26, 42, 13)');
+	expect(await fill(page)).toBe('rgb(32, 39, 27)');
 	await viewer(page).hover();
 	await viewer(page).getByRole('button', { name: 'Full screen' }).click();
 	const dialog = page.getByRole('dialog', { name: 'Diagram' });

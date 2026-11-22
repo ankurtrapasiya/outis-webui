@@ -1,5 +1,8 @@
 # Outis theme colours: research and proposed palettes
 
+Follow-up (2026-11-22): reading-mark colours and the Spark/FT variants were audited against
+learning research in `docs/superpowers/specs/2026-11-22-outis-themes-reading-audit-design.md`.
+
 Scope: colour only. Font and corner radius are out of scope (note: the fork today ships IBM Plex
 Mono and 0px corners, not the stock sans and rounded corners; changing those is a separate task).
 Date: 2026-11-14. Every number below was computed with the script in the appendix

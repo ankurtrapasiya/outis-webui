@@ -112,6 +112,7 @@ html.outis-light {
 	--outis-math: #7a4f00;
 	--outis-math-card: var(--outis-code-bg);
 	--outis-code-node: #0550ae;
+	--outis-example: #1f7265;
 }
 
 /* app.css's `body { background: #fff; color: #000 }` is a hardcoded literal,

@@ -35,15 +35,15 @@ const T = {
 	// Palette variants (src/outis-variants.css): Spark = DGX Spark skin, FT = Financial Times paper.
 	'outis-dark-spark': {
 		classes: ['dark', 'outis-dark', 'outis-spark'],
-		themeColor: '#12200a',
-		bg: 'rgb(18, 32, 10)',
-		text: 'rgb(213, 226, 192)',
-		white: 'rgb(227, 237, 208)',
-		onAccent: 'rgb(15, 26, 6)',
+		themeColor: '#171e14',
+		bg: 'rgb(23, 30, 20)',
+		text: 'rgb(217, 223, 208)',
+		white: 'rgb(230, 234, 221)',
+		onAccent: 'rgb(19, 24, 16)',
 		accent: 'rgb(118, 185, 0)',
 		filled: 'rgb(118, 185, 0)',
 		success: 'rgb(164, 225, 0)',
-		codeBg: 'rgb(26, 42, 13)',
+		codeBg: 'rgb(32, 39, 27)',
 		selection: 'rgba(118, 185, 0, 0.22)'
 	},
 	'outis-light-ft': {
@@ -55,7 +55,7 @@ const T = {
 		onAccent: 'rgb(255, 241, 224)',
 		accent: 'rgb(0, 91, 127)',
 		filled: 'rgb(0, 77, 107)',
-		success: 'rgb(47, 122, 89)',
+		success: 'rgb(39, 107, 77)',
 		codeBg: 'rgb(245, 235, 221)',
 		selection: 'rgba(0, 91, 127, 0.18)'
 	}
@@ -257,7 +257,7 @@ test('TH-33 code blocks take the palette: accent caret and the variant syntax co
 test('TH-34 inline code is a code chip: code surface, hairline, code colour, 4px corners, 0.95em', async ({ page, api }) => {
 	const want = {
 		'outis-dark': { color: 'rgb(121, 192, 255)', bg: 'rgb(33, 29, 26)' },
-		'outis-dark-spark': { color: 'rgb(194, 236, 92)', bg: 'rgb(26, 42, 13)' },
+		'outis-dark-spark': { color: 'rgb(194, 236, 92)', bg: 'rgb(32, 39, 27)' },
 		'outis-light-ft': { color: 'rgb(0, 91, 127)', bg: 'rgb(245, 235, 221)' }
 	};
 	for (const [theme, w] of Object.entries(want)) {
@@ -278,7 +278,7 @@ test('TH-34 inline code is a code chip: code surface, hairline, code colour, 4px
 const QUIET = {
 	'outis-dark': { chrome: 'rgb(20, 17, 14)', divider: 'rgb(54, 50, 46)' },
 	'outis-light': { chrome: 'rgb(247, 243, 239)', divider: 'rgb(215, 212, 207)' },
-	'outis-dark-spark': { chrome: 'rgb(15, 26, 6)', divider: 'rgb(51, 66, 31)' },
+	'outis-dark-spark': { chrome: 'rgb(19, 24, 16)', divider: 'rgb(56, 63, 48)' },
 	'outis-light-ft': { chrome: 'rgb(245, 235, 221)', divider: 'rgb(209, 199, 183)' }
 } as const;
 
@@ -577,8 +577,8 @@ test('TH-29 reading ladder and measure: body text in its contrast band, text as 
 	const want = {
 		'outis-dark': { body: 'rgb(215, 210, 203)', heading: 'rgb(231, 226, 220)', band: [11, 14] },
 		'outis-light': { body: 'rgb(51, 48, 43)', heading: 'rgb(29, 26, 22)', band: [12, 17] },
-		'outis-dark-spark': { body: 'rgb(205, 216, 186)', heading: 'rgb(227, 237, 208)', band: [10, 13] },
-		'outis-light-ft': { body: 'rgb(51, 48, 46)', heading: 'rgb(51, 48, 46)', band: [11, 13] }
+		'outis-dark-spark': { body: 'rgb(208, 213, 200)', heading: 'rgb(230, 234, 221)', band: [10, 13] },
+		'outis-light-ft': { body: 'rgb(51, 48, 46)', heading: 'rgb(31, 29, 27)', band: [11, 13] }
 	};
 	for (const theme of THEMES) {
 		await richChat(page, api, theme);
@@ -633,5 +633,31 @@ test('TH-37 an action\'s SVG icon takes the theme colour like the built-in Copy 
 		}
 	} finally {
 		await ctx.delete('/api/v1/functions/id/th37_action/delete').catch(() => null);
+	}
+});
+
+// Spec: docs/superpowers/specs/2026-11-22-outis-themes-reading-audit-design.md
+test('TH-38 each reading mark has its own colour, readable and quieter than body text, in every Outis theme', async ({ page, api }) => {
+	const chat = await api.chat({ title: 'TH-38', assistant: 'Body with a **key term**, an *example*, a [link](https://example.com) and $x = 1$.\n\n## Heading' });
+	for (const theme of THEMES) {
+		await useTheme(page, theme);
+		await page.goto(`/c/${chat.id}`);
+		await expect(page.locator('.markdown-prose .katex').first()).toBeVisible();
+		const c = await page.evaluate(() => {
+			const q = (s: string) => getComputedStyle(document.querySelector(`.markdown-prose ${s}`)!).color;
+			return { body: q('p'), key: q('p strong'), example: q('p em'), link: q('p a'), math: q('p .katex'), heading: q('h2') };
+		});
+		const bg = T[theme].bg;
+		const marks = { key: c.key, example: c.example, link: c.link, math: c.math };
+		// One colour per role: no two marks, and no mark and body text, share a colour.
+		const all = Object.values({ ...marks, body: c.body });
+		expect(new Set(all).size, `${theme} ${JSON.stringify(c)}`).toBe(all.length);
+		for (const [role, col] of Object.entries(marks)) {
+			expect(contrast(col, bg), `${theme} ${role}`).toBeGreaterThanOrEqual(4.5);
+			// Quieter than the text it sits in (WCAG ratio as the proxy for APCA's Lc).
+			expect(contrast(col, bg), `${theme} ${role}`).toBeLessThanOrEqual(contrast(c.body, bg));
+		}
+		// Headings step beyond body text.
+		expect(contrast(c.heading, bg), theme).toBeGreaterThan(contrast(c.body, bg));
 	}
 });

@@ -108,7 +108,8 @@ one markup code; the theme (`src/outis-theme-shared.css`, `AlertRenderer.svelte`
 - **CR-21** The five callouts render with the guide's labels: `[!TIP]` Takeaway, `[!NOTE]` Meaning,
   `[!WARNING]` Trap, `[!IMPORTANT]` Remember, `[!CAUTION]` Your turn; the body text follows the label.
 - **CR-22** In Outis-Dark and Outis-Light, reply `strong` is the key-term colour (`--outis-key`), `em` the
-  example blue (`--outis-code-node`), the two differ, and `strong` inside a heading keeps the heading colour.
+  example colour (`--outis-example`: bluish green, periwinkle in Spark; it was the code-node blue until
+  2026-11-22, which read as a link), `em` differs from `strong` and from a link, and `strong` inside a heading keeps the heading colour.
 - **CR-23** A reply's `embeds` (tool and filter cards) render above its text: the cards' bottom edge is at or
   above the first line of text. (Fork commit 45b22c7ed: below the text they slid down while the reply streamed.)
 

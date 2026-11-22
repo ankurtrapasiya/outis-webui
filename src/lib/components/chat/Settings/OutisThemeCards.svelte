@@ -31,9 +31,9 @@
 			value: 'outis-dark-spark',
 			name: 'Outis Spark',
 			hint: 'DGX green and gold',
-			page: '#12200a',
+			page: '#171e14',
 			accent: '#76b900',
-			dots: ['#12200a', '#76b900', '#cba35e'],
+			dots: ['#171e14', '#76b900', '#cba35e'],
 			// Honeycomb cell with a spark: the Spark's grille.
 			paths: ['M12 2.8 20 7.4v9.2L12 21.2 4 16.6V7.4Z', 'M13 7l-3.5 5.5h3L11 17l3.5-5.5h-3Z']
 		},

@@ -70,7 +70,7 @@ in the same change.
 | `notes-render` | LaTeX in notes, markdown-only notes, math kept on save, print to PDF |
 | `chat-diagrams` | Diagrams inline at native size, themed, chat PDF fit |
 | `chat-behaviour` | Tool images shown and named, documents sent once, skills kept, composer |
-| `theme` | Outis-Dark/Light, fonts, one-ratio type scale, flat shape, focus, code blocks |
+| `theme` | Outis Dark/Light/Spark/FT colours, stock type and shape, focus, code blocks, one colour per reading mark |
 | `branding` | "Outis" wherever the instance names itself |
 
 All eight are tested (about 100 checks, 3–4 minutes). One check is not automated yet: CB-5,
@@ -85,9 +85,11 @@ them.
 
 ## Fork features
 
-- **Themes**: Outis-Dark (default) and Outis-Light; seven monospace faces (IBM Plex Mono
-  default); one ratio drives every text size; flat corners. Design notes:
-  `OUTIS_DARK_THEME_SPEC.md`, `OUTIS_LIGHT_THEME_SPEC.md`, `OUTIS_DARK_CONSISTENCY_SPEC.md`.
+- **Themes**: Outis Dark (default), Outis Light, Outis Spark and Outis FT. Colour only: font,
+  sizes and corners are stock (since 2026-11-14). A reply's key terms, examples, links and maths
+  each get their own colour in every theme, checked by `scripts/outis-palette-check.py`.
+  Design notes: `docs/outis-theme-colour-research.md`,
+  `docs/superpowers/specs/2026-11-22-outis-themes-reading-audit-design.md`, `OUTIS_READING_SPEC.md`.
 - **Notes**: folders, previous/next stepping, draft editing with save on demand, LaTeX, print
   to PDF with real text.
 - **Chat**: diagrams rendered inline (by the Kroki filter in `outis-mneme`), tool-result
