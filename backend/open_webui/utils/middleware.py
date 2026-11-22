@@ -171,6 +171,7 @@ from open_webui.utils.tool_calling import (
     tool_repetition_error,
 )
 from open_webui.utils.tool_search import apply_tool_search, resolve_tool_call, split_tool_call_batches
+from open_webui.utils.outis_reply_gate import ReplyGate  # Fork (CB-35)
 from open_webui.utils.tools import (
     connect_mcp_server,
     display_file,
@@ -5891,7 +5892,35 @@ async def streaming_chat_response_handler(response, ctx):
                             }
                         )
 
-                while tool_calls:
+                # Fork (CB-35): one more pass when the finished reply draws ASCII diagrams or leaves its checklist open.
+                async def outis_open_tasks():
+                    if 'update_task' not in metadata.get('tools', {}) or not is_saved_chat_id(metadata.get('chat_id')):
+                        return []
+                    from open_webui.tools.builtin import tasks_on_branch
+
+                    tasks = await Chats.get_chat_tasks_by_id(metadata['chat_id'])
+                    if not tasks or not tasks_on_branch(
+                        tasks, await Chats.get_messages_map_by_chat_id(metadata['chat_id']), metadata.get('message_id')
+                    ):
+                        return []
+                    return [t for t in tasks if t.get('status') in ('pending', 'in_progress')]
+
+                def outis_drop(items):
+                    prior_output[:] = [i for i in prior_output if all(i is not x for x in items)]
+                    output[:] = [i for i in output if all(i is not x for x in items)]
+                    content_parts[:] = [get_output_text(full_output())]
+
+                outis_gate = ReplyGate(
+                    full_output,
+                    outis_open_tasks,
+                    lambda: not continuing
+                    and not ENABLE_RESPONSES_API_STATEFUL
+                    and not stop_reason
+                    and not final_answer_requested
+                    and (max_tool_call_iterations is None or tool_call_iterations < max_tool_call_iterations),
+                )
+
+                while tool_calls or await outis_gate.check(tool_calls, outis_drop):
                     round_error = stop_reason
                     if max_tool_call_iterations is not None and tool_call_iterations >= max_tool_call_iterations:
                         round_error = 'Tool-call iteration limit reached.'
@@ -6242,6 +6271,9 @@ async def streaming_chat_response_handler(response, ctx):
                                         ],
                                     }
                                 )
+
+                            if outis_note := outis_gate.take_note():
+                                messages.append({'role': 'user', 'content': outis_note})  # Fork (CB-35)
 
                             # Use the existing checkpoint format internally and strip it from the provider payload.
                             def get_request_messages(messages: list[dict]) -> list[dict]:

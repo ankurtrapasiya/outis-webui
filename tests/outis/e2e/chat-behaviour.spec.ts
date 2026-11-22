@@ -1,6 +1,7 @@
 import type { Page } from '@playwright/test';
 import { test, expect } from '../support/fixtures';
 import { python } from '../support/container';
+import { fakeRequests, fakeReset } from '../support/fake-openai';
 
 // --- Tool-result images -------------------------------------------------------------------
 
@@ -486,4 +487,26 @@ test('CB-29 a tool flagged offered_everywhere is listed on every model, even one
 	await expect(await listed('fake-model', 'Regression Owned')).toHaveCount(0); // CB-27 still holds for an unflagged tool
 	await expect(await listed('regression-owner', 'Regression Everywhere')).toHaveCount(1); // and listed once, where attached
 	await api.raw('POST', '/api/v1/models/model/delete', { id: 'regression-owner' });
+});
+
+test('CB-35 an ASCII diagram in a finished reply is redrawn once and spliced in place', async ({ api }) => {
+	await fakeReset();
+	const box = '```\n┌────────┐\n│ Leader │──► Append\n└────────┘\n     ▼\n```';
+	const { chatId, messageId } = await api.startChat({ model: 'fake-model', content: `ECHO\nBefore\n\n${box}\n\nAfter` });
+	await api.waitForReply(chatId, messageId);
+	const saved = (await api.getChat(chatId)).chat.history.messages[messageId].content as string;
+	expect(saved).toContain('Before');
+	expect(saved).toContain('```mermaid\nflowchart LR\n  Redrawn0 --> Done0\n```');
+	expect(saved).toContain('After');
+	expect(saved).not.toContain('┌');
+	const sent = (await fakeRequests()).filter((r) => r.path.endsWith('/chat/completions'));
+	expect(sent.filter((r) => JSON.stringify(r.body.messages).includes('<reply_check>'))).toHaveLength(1);
+});
+
+test('CB-35 a reply with only rendered diagrams gets no extra pass', async ({ api }) => {
+	await fakeReset();
+	const { chatId, messageId } = await api.startChat({ model: 'fake-model', content: 'ECHO\n```mermaid\nflowchart LR\n  A --> B\n```' });
+	await api.waitForReply(chatId, messageId);
+	const sent = (await fakeRequests()).filter((r) => r.path.endsWith('/chat/completions'));
+	expect(sent.some((r) => JSON.stringify(r.body.messages).includes('<reply_check>'))).toBe(false);
 });

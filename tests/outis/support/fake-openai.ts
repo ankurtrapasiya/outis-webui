@@ -9,6 +9,7 @@ import http from 'node:http';
 //               `CALL <tool> <json args>`, calls that tool, then replies once the result is back.
 //               Several `CALL` lines make several calls in the one turn.
 //               A message starting with an `ECHO` line is answered with the rest of it, verbatim.
+//               A CB-35 `<reply_check>` note asking for N diagrams gets N mermaid fences back.
 //   fake-drop   hangs up without answering (a dead upstream).
 //
 // Control endpoints for tests: GET /__requests, POST /__reset.
@@ -44,6 +45,12 @@ function reply(body: any): { content?: string; toolCalls?: Call[] } {
 	const last = messages[messages.length - 1];
 	if (last?.role === 'tool') return { content: 'Tool result received.' };
 	const lastUser = [...messages].reverse().find((m) => m.role === 'user');
+	// CB-35 reply check asking for N diagrams: answer with N mermaid fences and nothing else.
+	const check = text(lastUser?.content).match(/<reply_check>[\s\S]*?ONLY (\d+) fenced/);
+	if (check)
+		return {
+			content: Array.from({ length: Number(check[1]) }, (_, i) => '```mermaid\nflowchart LR\n  Redrawn' + i + ' --> Done' + i + '\n```').join('\n\n')
+		};
 	// `ECHO` on the first line: reply with the rest of the message verbatim (for outlet filters).
 	const echo = text(lastUser?.content).match(/^ECHO\n([\s\S]*)$/);
 	if (echo) return { content: echo[1] };
