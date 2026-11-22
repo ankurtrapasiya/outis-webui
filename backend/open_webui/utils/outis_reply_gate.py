@@ -13,6 +13,8 @@ RENDERED_LANGS = {'mermaid', 'dot', 'graphviz', 'plantuml', 'puml', 'c4', 'c4pla
 PLAIN_LANGS = {'', 'text', 'txt', 'plain', 'ascii'}
 BOX_CHARS = set('┌┐└┘├┤┬┴┼─│═║╔╗╚╝╠╣╦╩╬▼▲►◄')
 FENCE = re.compile(r'^(?P<tick>`{3,})(?P<lang>[^\n`]*)\n(?P<body>.*?)^(?P=tick)[ \t]*$', re.M | re.S)
+ARROW = re.compile(r'[→←↑↓↔⇒⇐⇔⟶⟵]|-->|<--|==>')
+ARROW_ONLY = re.compile(r'^[\s|│]*(?:[→←↑↓↔⇒⇐⇔⟶⟵]|-->|<--|==>|\||│|v|\^)+[\s|│]*$')
 PLUS_BORDER = re.compile(r'^\s*\+[-=]{2,}\+(\s*\+[-=]{2,}\+)*\s*$')
 
 
@@ -20,7 +22,11 @@ def _is_ascii_diagram(body: str) -> bool:
     lines = body.splitlines()
     box_lines = sum(1 for line in lines if any(ch in BOX_CHARS for ch in line))
     plus_lines = sum(1 for line in lines if PLUS_BORDER.match(line))
-    return box_lines >= 3 or plus_lines >= 2
+    # Arrow flows (2026-11-22): 'Prepare → Promise → Accept' over a line holding only '↑'. One arrow line alone
+    # (a limit, a type signature) is not a diagram; a lone '->' is code, so it does not count.
+    arrow_lines = [line for line in lines if ARROW.search(line)]
+    arrow_only = any(ARROW_ONLY.match(line) and ARROW.search(line) for line in lines)
+    return box_lines >= 3 or plus_lines >= 2 or len(arrow_lines) >= 2 or (bool(arrow_lines) and arrow_only)
 
 
 def ascii_diagrams(text: str) -> list[str]:

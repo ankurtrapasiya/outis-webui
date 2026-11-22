@@ -17,6 +17,12 @@ GO = '```go\nfunc main() {\n\t// ┌─ not a diagram, real code\n}\n```'
 # Detection: box art and +---+ art yes; formulas, logs, code and rendered fences no.
 assert ascii_diagrams(f'x\n{BOX}\ny\n{PLUS}') == [BOX, PLUS]
 assert ascii_diagrams('\n'.join([FORMULA, LOGS, MERMAID, GO])) == []
+FLOW = '```\nPaxos:  Prepare → Promise → Accept → Accepted\n                                ↑\n                needs a new round\n```'
+DASHES = '```\nClient --> Leader\nLeader --> Followers\n```'
+LIMIT = '```\nlim x → 0 of sin(x)/x = 1\n```'
+CODE_ARROW = '```\nptr->next = node;\nnode->prev = ptr;\n```'
+assert ascii_diagrams(f'{FLOW}\n{DASHES}') == [FLOW, DASHES]  # arrow flows are diagrams
+assert ascii_diagrams(f'{LIMIT}\n{CODE_ARROW}') == []  # one arrow line, or C's ->, is not
 assert rendered_fences(f'{MERMAID}\n{GO}\n```dot\ndigraph {{a->b}}\n```') == [MERMAID, '```dot\ndigraph {a->b}\n```']
 
 # Note: only what is wrong, ids named.

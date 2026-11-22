@@ -16,7 +16,11 @@ One extra model pass per reply, at most, when the finished reply has either prob
 1. **Detect** (`utils/outis_reply_gate.py`, pure functions):
    - an ASCII diagram: a code fence whose language is empty, `text`, `txt`, `plain` or `ascii`, and
      whose body has 3+ lines with box-drawing characters (`┌ ─ │ └ ▼ ...`) or 2+ `+---+` border lines.
-     Formula, log or code blocks have neither, so they pass.
+     Since 2026-11-22 (second deploy) also arrow flows: 2+ lines with `→ ← ↑ ↓ ↔ ⇒`, `-->`, `<--` or `==>`,
+     or one such line plus a line holding only an arrow (the `Prepare → Promise` block that got past the
+     first version). One arrow line alone (a limit, a signature) and C's `->` do not count.
+     Formula, log or code blocks have neither, so they pass. Known false positive: a plain block with two
+     lines of maths arrows (`f: X → Y`, `g: Y → Z`) gets a redraw request.
    - open tasks: the chat's checklist is on this reply's branch (CB-34) and has pending or
      in_progress items, and the model has `update_task`.
 2. **Ask once.** The tool loop (`while tool_calls`) runs one more round with no tool calls and a
