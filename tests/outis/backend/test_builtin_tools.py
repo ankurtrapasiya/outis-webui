@@ -47,3 +47,36 @@ note = open_tasks_note([{'id': 'b1', 'content': 'done one', 'status': 'completed
 assert '- b2 [in_progress] Diagnose overfit' in note and '- b3 [pending] Implement' in note, note
 assert 'done one' not in note and 'update_task' in note, note
 print('CB-33 pass')
+
+# CB-34: a checklist belongs to the reply branch that made it
+import asyncio, inspect
+from open_webui.tools.builtin import tasks_on_branch, create_tasks, update_task
+
+history = {'u1': {'parentId': None}, 'a1': {'parentId': 'u1'}, 'u2': {'parentId': 'a1'}, 'a2': {'parentId': 'u2'},
+           'a1b': {'parentId': 'u1'}}  # a1b regenerates a1
+owned = [{'id': 'x', 'content': 'c', 'status': 'in_progress', 'message_id': 'a1'}]
+assert tasks_on_branch(owned, history, 'a1')        # the reply that made it (continue)
+assert tasks_on_branch(owned, history, 'a2')        # a later turn on the same branch
+assert not tasks_on_branch(owned, history, 'a1b')   # a regenerate is a sibling
+assert tasks_on_branch([{'id': 'x', 'content': 'c', 'status': 'pending'}], history, 'a1b')  # pre-CB-34 list kept
+assert tasks_on_branch(owned, history, 'missing') and tasks_on_branch(owned, None, 'a1b')  # unknown: keep
+assert tasks_on_branch([], history, 'a1b')
+assert 'before your final answer' in inspect.getdoc(create_tasks).lower()
+assert 'before your final answer' in inspect.getdoc(update_task).lower()
+
+stored = {}
+from open_webui.models import chats as chats_mod
+async def fake_update(chat_id, tasks): stored[chat_id] = tasks
+orig = chats_mod.Chats.update_chat_tasks_by_id
+chats_mod.Chats.update_chat_tasks_by_id = fake_update
+import open_webui.tools.builtin as builtin_mod
+orig_saved = builtin_mod.is_saved_chat_id
+builtin_mod.is_saved_chat_id = lambda _id: True
+try:
+    asyncio.run(create_tasks([{'content': 'Find paper'}, {'content': 'Explain', 'status': 'in_progress'}],
+                             __chat_id__='c1', __message_id__='a1'))
+finally:
+    chats_mod.Chats.update_chat_tasks_by_id = orig
+    builtin_mod.is_saved_chat_id = orig_saved
+assert [t['message_id'] for t in stored['c1']] == ['a1', 'a1'], stored
+print('CB-34 pass')

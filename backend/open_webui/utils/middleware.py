@@ -2898,9 +2898,17 @@ async def process_chat_payload(request, form_data, user, metadata, model):
             and messages
             and messages[-1].get('role') == 'user'
         ):
-            from open_webui.tools.builtin import open_tasks_note
+            from open_webui.tools.builtin import _emit_tasks, open_tasks_note, tasks_on_branch
 
-            note = open_tasks_note(await Chats.get_chat_tasks_by_id(metadata['chat_id']))
+            tasks = await Chats.get_chat_tasks_by_id(metadata['chat_id'])
+            # Fork (CB-34): a list made on another branch (regenerate, edited message) is not this reply's.
+            if tasks and not tasks_on_branch(
+                tasks, await Chats.get_messages_map_by_chat_id(metadata['chat_id']), metadata.get('message_id')
+            ):
+                await Chats.update_chat_tasks_by_id(metadata['chat_id'], [])
+                await _emit_tasks(event_emitter, [])
+                tasks = []
+            note = open_tasks_note(tasks)
             if note:
                 form_data['messages'] = add_or_update_user_message('\n\n' + note, messages, append=True)
 

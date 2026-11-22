@@ -4166,6 +4166,20 @@ def open_tasks_note(tasks: list[dict] | None) -> str | None:
     )
 
 
+def tasks_on_branch(tasks: list[dict] | None, messages: dict | None, message_id: str | None) -> bool:
+    """Fork (CB-34): a checklist belongs to the reply that made it and that reply's descendants. True when every
+    owner id on the list is message_id or one of its ancestors in the chat history. A list without owner ids (made
+    before CB-34) or a reply missing from the history is kept, as before."""
+    owners = {t.get('message_id') for t in tasks or [] if t.get('message_id')}
+    if not owners or not messages or message_id not in messages:
+        return True
+    branch, current = set(), message_id
+    while current and current not in branch:
+        branch.add(current)
+        current = (messages.get(current) or {}).get('parentId')
+    return owners <= branch
+
+
 async def create_tasks(
     tasks: list[TaskItem],
     __chat_id__: str = None,
@@ -4176,6 +4190,8 @@ async def create_tasks(
 ) -> str:
     """
     Create a visible task checklist for multi-step work so progress can be shown in chat.
+    Before your final answer, mark every item completed or cancelled with update_task; never end a reply with
+    items pending or in_progress.
 
     :param tasks: List of task items. Each item: content (string, required), status (pending|in_progress|completed|cancelled, default pending), id (optional, auto-generated).
     :return: JSON with the full task list and summary counts
@@ -4202,7 +4218,8 @@ async def create_tasks(
             if status not in VALID_TASK_STATUSES:
                 status = 'pending'
 
-            all_tasks.append({'id': item_id, 'content': content, 'status': status})
+            # Fork (CB-34): the reply that made the list owns it.
+            all_tasks.append({'id': item_id, 'content': content, 'status': status, 'message_id': __message_id__})
 
         await Chats.update_chat_tasks_by_id(__chat_id__, all_tasks)
         await _emit_tasks(__event_emitter__, all_tasks)
@@ -4227,6 +4244,7 @@ async def update_task(
 ) -> str:
     """
     Mark a single visible task item as completed, in_progress, pending, or cancelled.
+    Close every item (completed or cancelled) before your final answer.
 
     :param id: The task ID to update
     :param status: New status: completed, in_progress, pending, or cancelled (default: completed)
