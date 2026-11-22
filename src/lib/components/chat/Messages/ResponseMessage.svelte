@@ -1,4 +1,6 @@
 <script lang="ts">
+	// Outis TH-37: a CSS url() for an action's SVG data URI; works for base64 and plain-text SVGs (which may hold quotes or #).
+	const iconMaskUrl = (icon: string) => `url("${icon.replace(/"/g, '%22').replace(/#/g, '%23')}")`;
 	import EditPencilIcon from '$lib/components/layout/Sidebar/icons/EditPencil.svelte';
 	import CopyIcon from '$lib/components/layout/Sidebar/icons/Copy.svelte';
 	import TrashIcon from '$lib/components/layout/Sidebar/icons/Trash.svelte';
@@ -1646,7 +1648,18 @@
 													actionMessage(action.id, message);
 												}}
 											>
-												{#if action?.icon}
+												{#if action?.icon && action.icon.startsWith('data:image/svg')}
+													<!-- Outis TH-37: an SVG icon is a mask filled with the button's current colour, so it takes every
+													     theme's colour (and hover) exactly like the built-in icons; an <img> cannot inherit colour. -->
+													<span
+														data-action-icon
+														class="block size-4 bg-current"
+														style="mask-repeat: no-repeat; mask-position: center; mask-size: contain; -webkit-mask-repeat: no-repeat; -webkit-mask-position: center; -webkit-mask-size: contain;"
+														style:mask-image={iconMaskUrl(action.icon)}
+														style:-webkit-mask-image={iconMaskUrl(action.icon)}
+														aria-hidden="true"
+													></span>
+												{:else if action?.icon}
 													<div class="size-4">
 														<img
 															src={action.icon}

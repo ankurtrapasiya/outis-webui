@@ -35,6 +35,11 @@ because the app auto-focuses it after load (history below); TH-30 and TH-31 guar
   mark on a tile in that theme's page colour and three swatches. A card applies its theme, updates
   the select and is `aria-checked`. Select labels: 🌘 Outis Dark, 📖 Outis Light, ⚡ Outis Spark,
   📰 Outis FT.
+- **TH-37** A function action's SVG icon (`icon_url: data:image/svg+xml...`) is drawn as a mask filled with the
+  button's current colour (`[data-action-icon]`, no `<img>`), so in every Outis theme it has the same colour as the
+  built-in Copy icon next to it, and turns with it on hover. Other icon types (PNG URLs) still render as `<img>`.
+  User, 2026-11-22: "icons for printing, saving notes to obsidian ... differ from inbuilt one in themes. fix them once
+  for all".
 - **TH-32** Spark -> FT leaves no Spark/dark class and FT's own grays; FT -> Outis-Dark leaves
   no FT class and the blue accent.
 - Font, text sizes, corner radii, spacing and icon strokes are exactly stock Dark's. Only

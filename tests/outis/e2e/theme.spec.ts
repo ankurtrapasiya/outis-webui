@@ -604,3 +604,34 @@ test('TH-29 reading ladder and measure: body text in its contrast band, text as 
 		expect(Math.abs(textW - proseW)).toBeLessThan(2);
 	}
 });
+
+test('TH-37 an action\'s SVG icon takes the theme colour like the built-in Copy icon, in every Outis theme', async ({ page, api }) => {
+	const ctx = (api as any).ctx;
+	// Plain-text SVG with single quotes and a #: the hard case (the Printable PDF icon has this form).
+	const icon = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='#000' stroke-width='1.5'><path d='M4 4h16v16H4z'/></svg>";
+	const src = `"""\ntitle: TH-37 action\nicon_url: ${icon}\n"""\n\nclass Action:\n    async def action(self, body, __user__=None):\n        return None\n`;
+	await ctx.delete('/api/v1/functions/id/th37_action/delete').catch(() => null);
+	expect((await ctx.post('/api/v1/functions/create', { data: { id: 'th37_action', name: 'TH-37 action', content: src, meta: { description: 'TH-37' } } })).ok()).toBe(true);
+	expect((await ctx.post('/api/v1/functions/id/th37_action/toggle')).ok()).toBe(true);
+	expect((await ctx.post('/api/v1/functions/id/th37_action/toggle/global')).ok()).toBe(true);
+	try {
+		const chat = await api.chat({ title: 'TH-37', assistant: 'A reply with a custom action.', model: 'fake-model' });
+		for (const theme of THEMES) {
+			await useTheme(page, theme);
+			await page.goto(`/c/${chat.id}`);
+			const action = page.locator('button[aria-label="TH-37 action"]');
+			await expect(action, theme).toBeVisible();
+			await expect(action.locator('img'), theme).toHaveCount(0);
+			const s = await action.evaluate((b) => {
+				const mark = b.querySelector('[data-action-icon]') as HTMLElement | null;
+				const copy = b.closest('div')!.parentElement!.querySelector('button.copy-response-button svg') as SVGElement | null;
+				return { mark: mark ? getComputedStyle(mark).backgroundColor : null, copy: copy ? getComputedStyle(copy).color : null };
+			});
+			expect(s.mark, theme).not.toBeNull();
+			expect(s.copy, theme).not.toBeNull();
+			expect(s.mark, theme).toBe(s.copy);
+		}
+	} finally {
+		await ctx.delete('/api/v1/functions/id/th37_action/delete').catch(() => null);
+	}
+});
