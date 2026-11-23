@@ -363,32 +363,6 @@ html.outis-light div:has(> div[class*='language-']) [class~='bg-white'] {
 	background-color: var(--outis-code-bg);
 }
 
-/* The Outis mark (static/favicon.png) is a single flat fill of the DARK
-   theme's accent, #2dff8f — correct on near-black, but 1.3:1 on paper, so on
-   this theme the sign-in logo, the assistant's avatar on every reply, the
-   notification toast icon and the model-editor default image all but vanish.
-   The splash art needs no such treatment: static/splash.png (the asset the
-   light branch of app.html already picks) is drawn in #090d0c ink and reads
-   correctly as-is.
-
-   The mark is one flat colour on transparency, so a brightness filter maps it
-   exactly rather than approximately: 0.431 x (45, 255, 143) = (19, 110, 62),
-   which is blue-600 to within a hair — the same green a primary button uses,
-   at 6.0:1 on the paper. That avoids shipping a second copy of the artwork
-   that would then have to be kept in sync with the first.
-
-   The mark ships at two paths and both are in use: components reference
-   `/static/favicon.png` directly (OnBoarding, NotificationToast, ModelEditor),
-   while safeImageUrl.ts's PLACEHOLDER_IMAGE and AtCommands' onerror fall back
-   to `/favicon.png` — which is what the model avatar on the chat placeholder
-   actually loads. Matching the suffix covers both without listing them.
-
-   `[src$=]` still can't reach a user's own uploaded avatar: those are served
-   from `/api/v1/users/<id>/profile/image` or a data: URL. */
-html.outis-light img[src$='favicon.png'] {
-	filter: brightness(0.431);
-}
-
 /* Same chrome, its text: `text-black`, which left the language label and the
    Collapse/Run/Save/Copy controls darker than any token in the code below
    them. They're furniture, not content — lift them to gray-600 so the code

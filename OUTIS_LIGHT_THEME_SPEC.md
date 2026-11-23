@@ -242,16 +242,13 @@ outside its accent hue. Fixed in `outis-theme-shared.css` by re-pointing `outlin
 app.css keeps its width, offset, and its deliberate high-contrast ring on editors. Verified by
 keyboard: the ring is now `#008350` on Outis-Light and `#2dff8f` on Outis-Dark.
 
-### The Outis mark is drawn in the dark theme's accent
+### The Outis mark carries its own plate
 
-`static/favicon.png` is a single flat fill of `#2dff8f` — 1.3:1 on paper, so the sign-in logo,
-the assistant's avatar on every reply, the notification toast icon and the model-editor default
-all but vanished. `static/splash.png` needed nothing: it is already drawn in `#090d0c` ink, which
-is the asset `app.html`'s light branch picks. Since the mark is one flat colour on transparency,
-`filter: brightness(0.431)` maps it exactly onto blue-600 rather than approximately, which avoids
-shipping a second copy of the artwork to keep in sync. It ships at two paths that are both live
-(`/static/favicon.png` from components, `/favicon.png` from `safeImageUrl.ts`'s
-`PLACEHOLDER_IMAGE`), so the selector matches the suffix.
+`static/favicon.png` (the sign-in logo, the assistant's avatar on every reply, the notification
+toast icon and the model-editor default) is the eye from `outis-mneme/assets/logo.svg`, drawn on
+its own `#0A0E0C` plate, so it reads the same on paper and needs no light-theme treatment
+(TH-26 asserts `filter: none`). Until 2026-11-23 it was a flat `#2dff8f` ring on transparency,
+1.3:1 on paper, and the theme darkened it with `filter: brightness(0.431)`.
 
 ### There are two filled-control idioms, not one
 
