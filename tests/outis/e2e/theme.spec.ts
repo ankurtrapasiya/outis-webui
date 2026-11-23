@@ -499,10 +499,10 @@ test('TH-25 emerald text classes resolve to the success green, not the accent', 
 	}
 });
 
-test('TH-26 light theme: the favicon is darkened and the splash is the page colour', async ({ page }) => {
+test('TH-26 light theme: the favicon is left unfiltered and the splash is the page colour', async ({ page }) => {
 	await useTheme(page, 'outis-light');
 	await page.goto('/');
-	expect(await css(page, 'img[src$="favicon.png"]', 'filter')).toBe('brightness(0.431)');
+	expect(await css(page, 'img[src$="favicon.png"]', 'filter')).toBe('none');
 	expect(await probe(page, '', 'background-color', 'splash-screen')).toBe(T['outis-light'].bg);
 });
 

@@ -140,7 +140,8 @@ Stray colours:
 
 Light only:
 
-- **TH-26** Favicon image `filter` is `brightness(0.431)`; splash background is
+- **TH-26** Favicon image `filter` is `none` (the mark carries its own dark plate since
+  2026-11-23; the old flat-green mark needed `brightness(0.431)`); splash background is
   `rgb(251, 249, 245)`.
 - **TH-27** A formula is one colour -- symbols, numbers, variables, brackets, bars -- per theme:
   `#f0c674` (Outis-Dark) / `#7a4f00` (Outis-Light), different from the prose colour. Display

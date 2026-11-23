@@ -98,6 +98,8 @@ them.
 - **Branding**: the instance calls itself Outis. Allowed by the Open WebUI licence for
   deployments of at most 50 users in any 30 days; strings about the upstream project,
   community or company keep the upstream name.
+  The icons (tab, app, the assistant's avatar) are the eye from `outis-mneme/assets/logo.svg`;
+  the splash screen still shows the earlier ring.
 
 ## Where things live
 
